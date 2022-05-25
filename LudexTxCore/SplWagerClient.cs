@@ -18,8 +18,10 @@ namespace Solnet.Programs.Clients
 {
     public class SplWagerClient: BaseClient
     {
+        private bool isMainnet;
         public SplWagerClient(IRpcClient rpcClient, bool isMainnet) : base(rpcClient, null, isMainnet ? SplWagerProgram.ProgramIdKeyMainnet : SplWagerProgram.ProgramIdKeyDevnet)
         {
+            this.isMainnet = isMainnet;
         }
 
         public async Task<SplChallenge> GetChallengeAsync(PublicKey challenge)
@@ -43,7 +45,7 @@ namespace Solnet.Programs.Clients
             return SplProvider.Deserialize(data); 
         }
 
-        public async Task<RequestResult<string>> JoinAsync(Wallet.Wallet wallet, PublicKey challengeKey, bool isMainnet)
+        public async Task<RequestResult<string>> JoinAsync(Wallet.Wallet wallet, PublicKey challengeKey)
         {
             var challenge = await GetChallengeAsync(challengeKey);
             var pool = await GetPoolAsync(challenge.Pool);
