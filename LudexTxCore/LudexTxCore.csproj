@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Solnet.Extensions" Version="6.0.11" />
+      <PackageReference Include="Solnet.Programs" Version="6.0.11" />
+      <PackageReference Include="Solnet.Rpc" Version="6.0.11" />
+    </ItemGroup>
+
+</Project>
