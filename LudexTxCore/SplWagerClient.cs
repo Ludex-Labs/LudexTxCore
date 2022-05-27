@@ -87,6 +87,7 @@ namespace Solnet.Programs.Clients
                     throw new Exception("You need " + (balance.Result.Result.Value - amount) + " more sol"); 
                 }
                 var blockHash = await RpcClient.GetLatestBlockHashAsync();
+           
                 byte[] createAssociatedTokenAccountTx = new TransactionBuilder().
                     SetRecentBlockHash(blockHash.Result.Value.Blockhash).
                     SetFeePayer(wallet.Account).
@@ -94,11 +95,11 @@ namespace Solnet.Programs.Clients
                         wallet.Account.PublicKey,
                        associatedTokenAccount, 
                         mint)).
-                    AddInstruction(TokenProgram.Transfer(
+                    AddInstruction(SystemProgram.Transfer(
                         wallet.Account.PublicKey,
                         associatedTokenAccount,
-                        amount,
-                        wallet.Account.PublicKey)).
+                        amount)).
+                    AddInstruction(TokenProgram.SyncNative(associatedTokenAccount)).
                     Build(new List<Account> { wallet.Account });
 
                 await RpcClient.SendTransactionAsync(createAssociatedTokenAccountTx);
@@ -114,11 +115,11 @@ namespace Solnet.Programs.Clients
                 byte[] createAssociatedTokenAccountTx = new TransactionBuilder().
                     SetRecentBlockHash(blockHash.Result.Value.Blockhash).
                     SetFeePayer(wallet.Account).
-                    AddInstruction(TokenProgram.Transfer(
+                    AddInstruction(SystemProgram.Transfer(
                         wallet.Account.PublicKey,
                         associatedTokenAccount,
-                        amount,
-                        wallet.Account.PublicKey)).
+                        amount)).
+                    AddInstruction(TokenProgram.SyncNative(associatedTokenAccount)).
                     Build(new List<Account> { wallet.Account });
 
                 await RpcClient.SendTransactionAsync(createAssociatedTokenAccountTx); 
