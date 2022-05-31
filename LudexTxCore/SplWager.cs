@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Solnet.Programs.Utilities;
 
 namespace Solnet.Programs
 {
@@ -27,7 +28,7 @@ namespace Solnet.Programs
                 // challenge
                 AccountMeta.Writable(challenge, false),
                 // player
-                AccountMeta.Writable(playerAddress, true),
+                AccountMeta.Writable(playerAddress, false),
                 // payer
                 AccountMeta.Writable(user, true),
                 // provider_authority
@@ -44,11 +45,20 @@ namespace Solnet.Programs
                 AccountMeta.ReadOnly(SystemProgram.ProgramIdKey, false),
             };
 
+            byte[] data = new byte[8];
+            data[0] = 206;
+            data[1] = 55;
+            data[2] = 2;
+            data[3] = 106;
+            data[4] = 113;
+            data[5] = 220;
+            data[6] = 17;
+            data[7] = 163;
             return new TransactionInstruction
             {
                 ProgramId = isMainnet ? ProgramIdKeyMainnet.KeyBytes : ProgramIdKeyDevnet.KeyBytes,
                 Keys = keys,
-                Data = Array.Empty<byte>()
+                Data = data 
             };
         }
 

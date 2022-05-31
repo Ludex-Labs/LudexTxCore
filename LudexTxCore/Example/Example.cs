@@ -21,7 +21,7 @@ namespace Solnet.Examples
             
             var client = new SplWagerClient(rpc, false);
             var challenge = new PublicKey("<challenge pubkey>");
-            var res = await client.JoinAsync(wallet, challenge);
+            var res = await client.JoinAsync(wallet.Account, challenge);
         }
     }
 
