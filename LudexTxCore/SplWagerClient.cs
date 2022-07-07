@@ -46,7 +46,7 @@ namespace Solnet.Programs.Clients
             return SplProvider.Deserialize(data);
         }
 
-        public async Task<RequestResult<string>> JoinAsync(Wallet.Wallet wallet, PublicKey challengeKey)
+        public async Task<RequestResult<string>> JoinAsync(Account wallet, PublicKey challengeKey)
         {
             var challenge = await GetChallengeAsync(challengeKey);
             var pool = await GetPoolAsync(challenge.Pool);
@@ -55,7 +55,7 @@ namespace Solnet.Programs.Clients
             var blockHash = await RpcClient.GetLatestBlockHashAsync();
             byte[] tx = new TransactionBuilder()
                 .SetRecentBlockHash(blockHash.Result.Value.Blockhash)
-                .SetFeePayer(wallet.Account)
+                .SetFeePayer(wallet)
                 .AddInstruction(
                     Challenge.Program.ChallengeProgram.Join(
                         new Challenge.Program.JoinAccounts 
@@ -67,29 +67,29 @@ namespace Solnet.Programs.Clients
                             ProviderAuthority = provider.Authority,
                             UserTokenAccount = ata,
                             Mint = pool.Mint,
-                            User = wallet.Account,
-                            Payer = wallet.Account,
-                            Player = DerivePlayerAccountAddress(challengeKey, wallet.Account),
+                            User = wallet,
+                            Payer = wallet,
+                            Player = DerivePlayerAccountAddress(challengeKey, wallet),
                             SystemProgram = SystemProgram.ProgramIdKey,
                             TokenProgram = TokenProgram.ProgramIdKey,
                         },
                         WagerProgramKeyId
                         ))
-                .Build(new List<Account> { wallet.Account });
+                .Build(new List<Account> { wallet });
 
             RequestResult<string> sig = await RpcClient.SendTransactionAsync(tx);
             return sig;
         }
 
-        public async Task<PublicKey> GetAta(Wallet.Wallet wallet, PublicKey mint, ulong amount)
+        public async Task<PublicKey> GetAta(Account wallet, PublicKey mint, ulong amount)
         {
             PublicKey associatedTokenAccount =
-                AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(wallet.Account.PublicKey, mint);
+                AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(wallet.PublicKey, mint);
 
             var res = RpcClient.GetTokenAccountBalanceAsync(associatedTokenAccount.Key);
             if (!res.Result.WasSuccessful && mint == WellKnownTokens.WrappedSOL.TokenMint)
             {
-                var balance = RpcClient.GetBalanceAsync(wallet.Account.PublicKey.Key);
+                var balance = RpcClient.GetBalanceAsync(wallet.PublicKey.Key);
                 if (balance.Result.Result.Value < amount)
                 {
                     throw new Exception("You need " + (balance.Result.Result.Value - amount) + " more sol");
@@ -98,23 +98,23 @@ namespace Solnet.Programs.Clients
 
                 byte[] createAssociatedTokenAccountTx = new TransactionBuilder().
                     SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-                    SetFeePayer(wallet.Account).
+                    SetFeePayer(wallet).
                     AddInstruction(AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(
-                        wallet.Account.PublicKey,
+                        wallet.PublicKey,
                        associatedTokenAccount,
                         mint)).
                     AddInstruction(SystemProgram.Transfer(
-                        wallet.Account.PublicKey,
+                        wallet.PublicKey,
                         associatedTokenAccount,
                         amount)).
                     AddInstruction(TokenProgram.SyncNative(associatedTokenAccount)).
-                    Build(new List<Account> { wallet.Account });
+                    Build(new List<Account> { wallet });
 
                 await RpcClient.SendTransactionAsync(createAssociatedTokenAccountTx);
             }
             else if (mint == WellKnownTokens.WrappedSOL.TokenMint)
             {
-                var balance = RpcClient.GetBalanceAsync(wallet.Account.PublicKey.Key);
+                var balance = RpcClient.GetBalanceAsync(wallet.PublicKey.Key);
                 if (balance.Result.Result.Value + res.Result.Result.Value.AmountUlong < amount)
                 {
                     throw new Exception("You need " + (balance.Result.Result.Value + res.Result.Result.Value.AmountUlong - amount) + " more sol");
@@ -122,13 +122,13 @@ namespace Solnet.Programs.Clients
                 var blockHash = await RpcClient.GetLatestBlockHashAsync();
                 byte[] createAssociatedTokenAccountTx = new TransactionBuilder().
                     SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-                    SetFeePayer(wallet.Account).
+                    SetFeePayer(wallet).
                     AddInstruction(SystemProgram.Transfer(
-                        wallet.Account.PublicKey,
+                        wallet.PublicKey,
                         associatedTokenAccount,
                         amount)).
                     AddInstruction(TokenProgram.SyncNative(associatedTokenAccount)).
-                    Build(new List<Account> { wallet.Account });
+                    Build(new List<Account> { wallet });
 
                 await RpcClient.SendTransactionAsync(createAssociatedTokenAccountTx);
             }
