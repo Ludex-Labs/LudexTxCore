@@ -4,7 +4,6 @@ using Solnet.Programs.Models;
 using Solnet.Programs.Models.NameService;
 using Solnet.Rpc;
 using Solnet.Rpc.Models;
-using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +12,16 @@ using Solnet.Extensions;
 using Solnet.Rpc.Builders;
 using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Messages;
+using Solnet.Wallet;
+using Solnet.Programs;
 
-namespace Solnet.Programs.Clients
+namespace Ludex.Client
 {
-    public class SplWagerClient : BaseClient
+    public class SPLChallengeClient : BaseClient
     {
         public PublicKey WagerProgramKeyId;
 
-        public SplWagerClient(IRpcClient rpcClient, bool isMainnet) : base(rpcClient, null, GetProgramKeyId(isMainnet))
+        public SPLChallengeClient(IRpcClient rpcClient, bool isMainnet) : base(rpcClient, null, GetProgramKeyId(isMainnet))
         {
             WagerProgramKeyId = GetProgramKeyId(isMainnet);
         }
@@ -46,7 +47,7 @@ namespace Solnet.Programs.Clients
             return SplProvider.Deserialize(data);
         }
 
-        public async Task<RequestResult<string>> JoinAsync(Wallet.Wallet wallet, PublicKey challengeKey)
+        public async Task<RequestResult<string>> JoinAsync(Wallet wallet, PublicKey challengeKey)
         {
             var challenge = await GetChallengeAsync(challengeKey);
             var pool = await GetPoolAsync(challenge.Pool);
@@ -81,7 +82,7 @@ namespace Solnet.Programs.Clients
             return sig;
         }
 
-        public async Task<PublicKey> GetAta(Wallet.Wallet wallet, PublicKey mint, ulong amount)
+        public async Task<PublicKey> GetAta(Wallet wallet, PublicKey mint, ulong amount)
         {
             PublicKey associatedTokenAccount =
                 AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(wallet.Account.PublicKey, mint);
