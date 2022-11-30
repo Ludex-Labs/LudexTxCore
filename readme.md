@@ -1,3 +1,4 @@
+# FT Tx C# Core
 ## Introduction
 Ludex Tx Core is Ludex's C# SDK to interact with the Ludex FT Challenge contract on Solana.
 ## Features
